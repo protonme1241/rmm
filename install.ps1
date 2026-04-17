@@ -3,18 +3,7 @@ $dir  = "$env:LOCALAPPDATA\itmgn"
 $exe  = "$dir\itagnt.exe"
 $zip  = "$dir\itagnt.zip"
 $cfg  = "$dir\agent.json"
-$base = "https://rmm.xartechnology.cloud"
-
-# Accept self-signed / Sophos-intercepted certificates
-add-type @"
-    using System.Net;
-    using System.Security.Cryptography.X509Certificates;
-    public class TrustAll : ICertificatePolicy {
-        public bool CheckValidationResult(ServicePoint sp, X509Certificate cert, WebRequest req, int problem) { return true; }
-    }
-"@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAll
-[System.Net.ServicePointManager]::SecurityProtocol  = [System.Net.SecurityProtocolType]::Tls12
+$base = "https://rmm-proxy.aliakduman.workers.dev"
 
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
