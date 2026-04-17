@@ -5,6 +5,8 @@ $zip  = "$dir\itagnt.zip"
 $cfg  = "$dir\agent.json"
 $base = "https://rmm-proxy.aliakduman.workers.dev"
 
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
 Invoke-WebRequest -Uri "https://github.com/protonme1241/rmm/releases/download/v1.0/itagnt.zip" -OutFile $zip -UseBasicParsing
